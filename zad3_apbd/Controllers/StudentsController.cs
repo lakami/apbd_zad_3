@@ -75,6 +75,19 @@ public class StudentsController : ControllerBase
     [HttpPut("{indexNumber}", Name = "UpdateStudent")]
     public IActionResult UpdateStudent(string indexNumber, Student student)
     {
+        //czy taki student istnieje
+        if (GetAllStudentsFromDB().Any(s => s.IndexNumber == indexNumber) == false)
+        {
+            return NotFound($"Nie znaleziono studenta o podanym indeksie: {indexNumber}");
+        }
+        
+        //usuwanie studenta z bazy danych
+        DeleteStudentFromDB(indexNumber);
+        
+        //dodanie studenta do bazy danych
+        student.IndexNumber = indexNumber; //biorę domyślny indexNumber, nie modyfukuję go zgodnie z treścią zadania
+        AddNewStudentToDB(student);
+        
         return Ok();
     }
 
