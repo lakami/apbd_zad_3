@@ -79,8 +79,16 @@ public class StudentsController : ControllerBase
     }
 
     [HttpDelete("{indexNumber}", Name = "DeleteStudent")]
-    public IActionResult DeleteStudent(string indexNumber)
+    public async Task<IActionResult> DeleteStudent(string indexNumber)
     {
+        if (GetAllStudentsFromDB().Any(s => s.IndexNumber == indexNumber) == false)
+        {
+            return NotFound($"Nie znaleziono studenta o podanym indeksie: {indexNumber}");
+        }
+        
+        //usunięcie studenta z bazy danych
+        await DeleteStudentFromDB(indexNumber);
+        
         return Ok();
     }
 
@@ -125,7 +133,31 @@ public class StudentsController : ControllerBase
     private async Task AddNewStudentToDB(Student student)
     {
         var studentString = $"{student.FirstName},{student.LastName},{student.IndexNumber},{student.BirthDate},{student.StudiesName},{student.StudiesMode},{student.Email},{student.FathersName},{student.MothersName}";
-        await System.IO.File.AppendAllTextAsync(_csvFilePath, Environment.NewLine + studentString);
+        if (GetAllStudents().Count() == 0)
+        {
+            await System.IO.File.AppendAllTextAsync(_csvFilePath, studentString);
+        }
+        else
+        {
+             await System.IO.File.AppendAllTextAsync(_csvFilePath, Environment.NewLine + studentString);
+        }
     }
     
+    private async Task DeleteStudentFromDB(string indexNumber)
+    {
+        var lines = System.IO.File.ReadAllLines(_csvFilePath);
+        System.IO.File.Delete(_csvFilePath);
+        var newLines = lines.Where(line => line.Split(",")[2] != indexNumber);
+        using var stream = System.IO.File.OpenWrite(_csvFilePath);
+        using var writer = new StreamWriter(stream);
+        for(int i = 0; i < (newLines.Count()) - 1; i++)
+        {
+            await writer.WriteLineAsync(newLines.ElementAt(i));
+        }
+
+        if (newLines.Count() > 0)
+        {
+            await writer.WriteAsync(newLines.ElementAt(newLines.Count() - 1));
+        }
+    }
 }
