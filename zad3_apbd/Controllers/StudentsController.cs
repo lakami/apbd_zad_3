@@ -23,9 +23,11 @@ public class StudentsController : ControllerBase
     }
 
     [HttpGet("{indexNumber}", Name = "GetStudent")]
-    public Student GetStudent(string indexNumber)
+    public IActionResult GetStudent(string indexNumber)
     {
-        return new Student();
+        var student = GetAllStudentsFromDB().FirstOrDefault(student => 
+            student.IndexNumber == indexNumber);
+        return student == null ? NotFound($"Nie znaleziono studenta o podanym indeksie: {indexNumber}") : Ok(student);
     }
 
     [HttpPost(Name = "CreateStudent")]
