@@ -31,9 +31,45 @@ public class StudentsController : ControllerBase
     }
 
     [HttpPost(Name = "CreateStudent")]
-    public IActionResult CreateStudent(Student student)
+    public async Task<IActionResult> CreateStudent(Student student)
     {
+        //czy taki student istnieje
+        if (IsStudentValid(student) == false)
+        {
+            return BadRequest("Nieprawidłowe zapytanie do api");
+        }
+        
+        //czy nr indekus się nie powtarza z jakimś istniejącym
+        if (GetAllStudentsFromDB().Any(s => s.IndexNumber == student.IndexNumber))
+        {
+            return BadRequest($"Student o podanym indeksie już istnieje: {student.IndexNumber}");
+        }
+        
+        await AddNewStudentToDB(student);
+        
         return Ok();
+    }
+    
+    private bool IsStudentValid(Student student)
+    {
+        if (student == null)
+        {
+            return false;
+        }
+
+        if ((student.FirstName == null || student.FirstName.Length == 0)
+            || (student.LastName == null || student.LastName.Length == 0)
+            || (student.IndexNumber == null || student.IndexNumber.Length == 0)
+            || (student.BirthDate == null || student.BirthDate.Length == 0)
+            || (student.StudiesName == null || student.StudiesName.Length == 0)
+            || (student.StudiesMode == null || student.StudiesMode.Length == 0)
+            || (student.Email == null || student.Email.Length == 0)
+            || (student.FathersName == null || student.FathersName.Length == 0)
+            || (student.MothersName == null || student.MothersName.Length == 0))
+        {
+            return false;
+        }
+        return true;
     }
 
     [HttpPut("{indexNumber}", Name = "UpdateStudent")]
@@ -84,6 +120,12 @@ public class StudentsController : ControllerBase
             students.Add(student);
         }
         return students;
+    }
+    
+    private async Task AddNewStudentToDB(Student student)
+    {
+        var studentString = $"{student.FirstName},{student.LastName},{student.IndexNumber},{student.BirthDate},{student.StudiesName},{student.StudiesMode},{student.Email},{student.FathersName},{student.MothersName}";
+        await System.IO.File.AppendAllTextAsync(_csvFilePath, Environment.NewLine + studentString);
     }
     
 }

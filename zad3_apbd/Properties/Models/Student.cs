@@ -2,13 +2,13 @@
 
 public class Student
 {
-    public string FirstName {get; set;} = string.Empty;
-    public string LastName { get; set; } = string.Empty;
-    public string IndexNumber { get; set; } = string.Empty;
-    public string BirthDate { get; set; } = string.Empty;
+    public string FirstName {get; set;}
+    public string LastName { get; set; }
+    public string IndexNumber { get; set; }
+    public string BirthDate { get; set; } 
     public string StudiesName { get; set; }
     public string StudiesMode { get; set; }
-    public string Email { get; set; } = string.Empty;
-    public string FathersName { get; set; } = string.Empty;
-    public string MothersName { get; set; } = string.Empty;
+    public string Email { get; set; } 
+    public string FathersName { get; set; } 
+    public string MothersName { get; set; } 
 }
